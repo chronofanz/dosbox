@@ -422,7 +422,7 @@ public:
 				if (stat(buffer,&test)) continue;
 			}
 			if (test.st_mode & S_IFDIR) {
-				autoexec[12].Install(std::string("MOUNT C \"") + buffer + "\"");
+				autoexec[12].Install("");
 				autoexec[13].Install("C:");
 				if(secure) autoexec[14].Install("z:\\config.com -securemode");
 				command_found = true;
@@ -440,7 +440,7 @@ public:
 				}
 				*name++ = 0;
 				if (access(buffer,F_OK)) continue;
-				autoexec[12].Install(std::string("MOUNT C \"") + buffer + "\"");
+				autoexec[12].Install("");
 				autoexec[13].Install("C:");
 				/* Save the non-modified filename (so boot and imgmount can use it (long filenames, case sensivitive)) */
 				strcpy(orig,name);
