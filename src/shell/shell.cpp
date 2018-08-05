@@ -27,6 +27,10 @@
 #include "callback.h"
 #include "support.h"
 
+// chronofanz: defined for enabling -cycles flag below
+extern Bit32s CPU_CycleMax;
+extern bool CPU_CycleAutoAdjust;
+extern void GFX_SetTitle(Bit32s cycles, Bits frameskip, bool paused);
 
 Bitu call_shellstop;
 /* Larger scope so shell_del autoexec can use it to
@@ -474,6 +478,16 @@ public:
 		if ( !command_found ) {
 			if ( secure ) autoexec[12].Install("z:\\config.com -securemode");
 		}
+
+		// chronofanz: Adding -cycles flag
+		int cycles;
+		if (control->cmdline->FindInt("-cycles", cycles, true))
+		{
+			CPU_CycleMax = (Bit32s)cycles;
+			CPU_CycleAutoAdjust = false;
+			GFX_SetTitle(CPU_CycleMax, -1, false);
+		}
+
 		VFILE_Register("AUTOEXEC.BAT",(Bit8u *)autoexec_data,(Bit32u)strlen(autoexec_data));
 	}
 };
