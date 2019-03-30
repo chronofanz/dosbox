@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2002-2018  The DOSBox Team
+ *  Copyright (C) 2002-2019  The DOSBox Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -11,9 +11,9 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 /* 
@@ -63,8 +63,11 @@ static struct {
 	} dac;
 } tandy;
 
-static sn76496_device device(machine_config(), 0, 0, SOUND_CLOCK );
+static sn76496_device device_sn76496(machine_config(), 0, 0, SOUND_CLOCK );
+static ncr8496_device device_ncr8496(machine_config(), 0, 0, SOUND_CLOCK);
 
+static sn76496_base_device* activeDevice = &device_ncr8496;
+#define device (*activeDevice)
 
 static void SN76496Write(Bitu /*port*/,Bitu data,Bitu /*iolen*/) {
 	tandy.last_write=PIC_Ticks;
@@ -73,6 +76,8 @@ static void SN76496Write(Bitu /*port*/,Bitu data,Bitu /*iolen*/) {
 		tandy.enabled=true;
 	}
 	device.write(data);
+
+//	LOG_MSG("3voice write %X at time %7.3f",data,PIC_FullIndex());
 }
 
 static void SN76496Update(Bitu length) {
@@ -270,6 +275,10 @@ public:
 		if (SB_Get_Address(sbport, sbirq, sbdma)) {
 			enable_hw_tandy_dac=false;
 		}
+
+		//Select the correct tandy chip implementation
+		if (machine == MCH_PCJR) activeDevice = &device_sn76496;
+		else activeDevice = &device_ncr8496;
 
 		real_writeb(0x40,0xd4,0x00);
 		if (IS_TANDY_ARCH) {
